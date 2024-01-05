@@ -1,0 +1,111 @@
+<div id="container"></div>
+
+<script>
+    //Elaborated the method used by John, will optimise later
+    function loadHighcharts(callback) {
+        // Load Highcharts.js
+        var highchartsScript = document.createElement('script');
+        highchartsScript.setAttribute('src', 'https://code.highcharts.com/highcharts.js');
+        highchartsScript.onload = function () {
+            // Load Highcharts-more.js
+            var highchartsMoreScript = document.createElement('script');
+            highchartsMoreScript.setAttribute('src', 'https://code.highcharts.com/highcharts-more.js');
+            highchartsMoreScript.onload = function () {
+                // Load Columnrange.js
+                var columnrangeScript = document.createElement('script');
+                columnrangeScript.setAttribute('src', 'https://code.highcharts.com/modules/accessibility.js');//this line caused all the confusion columnrange.js is not the one but accessiblity.js is.
+                columnrangeScript.onload = function () {
+                    // Call the callback function to create and render the chart
+                    // if (typeof callback === 'function') {
+                    //     callback();
+                    // }
+                    // We can hardcode this too. 
+                    renderColumnRangeChart();
+                };
+                document.head.appendChild(columnrangeScript);
+            };
+            document.head.appendChild(highchartsMoreScript);
+        };
+        document.head.appendChild(highchartsScript);
+    }
+
+    function renderColumnRangeChart() {
+        var chartOptions = {
+            chart: {
+                type: 'columnrange',
+                inverted: true
+            },
+
+            title: {
+                text: 'Equity Allocation'
+            },
+
+            subtitle: {
+                text: 'Goal and Account Ranges Chart'
+            },
+
+            xAxis: {
+                categories: angular.element('.unqorkio-form').scope().submission.data.chartData2
+
+            },
+
+            yAxis: {
+                plotBands: {
+                    borderWidth: 50,
+                    from: angular.element('.unqorkio-form').scope().submission.data.from,//we can use use hidden variable for from
+                    to: angular.element('.unqorkio-form').scope().submission.data.to////we can use use hidden variable for to
+                },
+                title: {
+                    text: 'Percentage ( % )'
+                }
+            },
+
+            tooltip: {
+                valueSuffix: ' % '
+            },
+
+            plotOptions: {
+                columnrange: {
+                    dataLabels: {
+                        enabled: true,
+                        format: '{y} % '
+                    }
+                }
+            },
+
+            legend: {
+                enabled: false
+            },
+
+            //Right now the data is static once this is function will use submission data for chart
+            series: [{
+                name: 'Goals',
+                data: angular.element('.unqorkio-form').scope().submission.data.chartData
+            }]
+        };
+
+        Highcharts.chart('container', chartOptions);
+    }
+    function changeElementColor(color) {
+        var elements = document.querySelectorAll(".highcharts-point.highcharts-color-0");
+        for (var i = 0; i < elements.length; i++) {
+            elements[i].style.color = color;
+        }
+    }
+
+// Call the loadHighcharts function to load the required modules, and then call the renderColumnRangeChart function to create and render the chart
+//loadHighcharts(renderColumnRangeChart);
+</script>
+
+<!-- Listen for data updates to redraw the chart. Event raised in initCloseSelectFilters component -->
+
+<script ng-if="data.chartRefresh == 'true'">
+    //console.log('render chart');
+    loadHighcharts(renderColumnRangeChart);
+    //renderColumnRangeChart();
+    angular.element('.unqorkio-form').scope().submission.data.chartRefresh = 'false';
+</script>
+
+<script ng-if="data.flag == 'true'">
+    changeElementColor("#FF0000");
+</script>

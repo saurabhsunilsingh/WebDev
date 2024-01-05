@@ -1,0 +1,62 @@
+<div id="container"></div>
+
+
+<script>
+    function loadHighcharts(callback) {
+        // Load Highcharts.js
+        var highchartsScript = document.createElement('script');
+        highchartsScript.setAttribute('src', 'https://code.highcharts.com/highcharts.js');
+        highchartsScript.onload = function () {
+            // Call the callback function to create and render the chart
+            if (typeof callback === 'function') {
+                callback();
+            }
+            // We can hardcode this too. 
+            //renderColumnRangeChart();
+        };
+        document.head.appendChild(highchartsScript);
+    }
+    // Define your chart options as an object
+    function renderColumnRangeChart() {
+        var chartOptions = {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: 'My Chart'
+            },
+            xAxis: {
+                categories:  angular.element('.unqorkio-form').scope().submission.data.months
+            },
+            yAxis: {
+                title: {
+                    text: 'Value'
+                }
+            },
+            series: [
+                {
+                    name: 'Series 1',
+                    data: angular.element('.unqorkio-form').scope().submission.data.chartData
+                },
+                {
+                    name: 'Series 2',
+                    data: angular.element('.unqorkio-form').scope().submission.data.chartData2
+                },
+                {
+                    name: 'Series 3',
+                    data: angular.element('.unqorkio-form').scope().submission.data.chartData3
+                }
+            ]
+        };
+
+        // Finally, create the chart using the Highcharts.chart() function
+        // and passing in the chart options object as the first argument
+        Highcharts.chart('container', chartOptions);
+    }
+</script>
+<script ng-if="data.chartRefresh == 'true'">
+    //console.log('render chart');
+    loadHighcharts(renderColumnRangeChart);
+    //renderColumnRangeChart();
+    angular.element('.unqorkio-form').scope().submission.data.chartRefresh = 'false';
+</script>

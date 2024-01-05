@@ -1,0 +1,11 @@
+{
+  "name": "business",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Trial.js",
+  "scripts": {
+    "start": "node Trial.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

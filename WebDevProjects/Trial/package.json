@@ -1,0 +1,16 @@
+{
+  "name": "trial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Trial.js",
+  "scripts": {
+    "start": "node Trial.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongoose": "^7.0.2",
+    "node": "^19.8.1"
+  }
+}

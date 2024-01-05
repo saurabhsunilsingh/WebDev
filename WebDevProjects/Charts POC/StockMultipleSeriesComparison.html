@@ -1,0 +1,106 @@
+<div id="container"></div>
+
+<script>
+    function loadHighcharts(callback) {
+        // Load Highcharts script
+        var highchartsScript = document.createElement('script');
+        highchartsScript.src = 'https://code.highcharts.com/highcharts.js';
+        highchartsScript.onload = function () {
+            // Load Stock module script after Highcharts script has loaded
+            var stockScript = document.createElement('script');
+            stockScript.src = 'https://code.highcharts.com/modules/stock.js';
+            stockScript.onload = function () {
+                // Call the callback function when both scripts have loaded
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            };
+            document.head.appendChild(stockScript);
+        };
+        document.head.appendChild(highchartsScript);
+    }
+
+    var seriesOptions = [],
+        seriesCounter = 0,
+        names = ['MSFT', 'AAPL', 'GOOG'];
+
+    /**
+     * Create the chart when all data is loaded
+     * @return {undefined}
+     */
+    function createChart() {
+        var chartOptions = {
+
+            rangeSelector: {
+                selected: 4
+            },
+
+            yAxis: {
+                labels: {
+                    formatter: function () {
+                        return (this.value > 0 ? ' + ' : '') + this.value + '%';
+                    }
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 2,
+                    color: 'silver'
+                }]
+            },
+
+            plotOptions: {
+                series: {
+                    compare: 'percent',
+                    showInNavigator: true
+                }
+            },
+
+            tooltip: {
+                pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
+                valueDecimals: 2,
+                split: true
+            },
+
+            series: seriesOptions
+        }
+        Highcharts.stockChart('container', chartOptions);
+    }
+
+    function success(data) {
+        var name = this.url.match(/(msft|aapl|goog)/)[0].toUpperCase();
+        var i = names.indexOf(name);
+        seriesOptions[i] = {
+            name: name,
+            data: data
+        };
+
+        // As we're loading the data asynchronously, we don't know what order it
+        // will arrive. So we keep a counter and create the chart when all the data is loaded.
+        seriesCounter += 1;
+
+        if (seriesCounter === names.length) {
+            createChart();
+        }
+    }
+
+    // Import Highcharts modules
+    Highcharts.getScript('https://code.highcharts.com/modules/exporting.js', function () {
+        Highcharts.getScript('https://code.highcharts.com/modules/accessibility.js', function () {
+            // Load data and create chart
+            // Using a free API with my personal email given for access key
+            Highcharts.getJSON('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=MSFT&apikey=1VD7CE2FL3KFYE1M', success);
+            Highcharts.getJSON('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&apikey=1VD7CE2FL3KFYE1M', success);
+            Highcharts.getJSON('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=GOOG&apikey=1VD7CE2FL3KFYE1M', success);
+
+        });
+    });
+
+
+</script>
+
+<script ng-if="data.chartRefresh == 'true'">
+    //console.log('render chart');
+    loadHighcharts(createChart);
+    //renderColumnRangeChart();
+    angular.element('.unqorkio-form').scope().submission.data.chartRefresh = 'false';
+</script>

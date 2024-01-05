@@ -1,0 +1,114 @@
+<script>
+    function loadHighcharts(callback) {
+  // Load Highcharts.js
+  var highchartsScript = document.createElement('script');
+  highchartsScript.setAttribute('src', 'https://code.highcharts.com/highcharts.js');
+  highchartsScript.onload = function() {
+    // Load Highcharts-more.js
+    var highchartsMoreScript = document.createElement('script');
+    highchartsMoreScript.setAttribute('src', 'https://code.highcharts.com/highcharts-more.js');
+    highchartsMoreScript.onload = function() {
+      // Load Accessibility.js
+      var accessibilityScript = document.createElement('script');
+      accessibilityScript.setAttribute('src', 'https://code.highcharts.com/modules/accessibility.js');
+      accessibilityScript.onload = function() {
+        // Call the callback function to create and render the chart
+        if (typeof callback === 'function') {
+          callback();
+        }
+      };
+      document.head.appendChild(accessibilityScript);
+    };
+    document.head.appendChild(highchartsMoreScript);
+  };
+  document.head.appendChild(highchartsScript);
+}
+
+function generateChartOptions() {
+  // define chart options as before
+  Highcharts.chart('container', {
+  chart: {
+    type: 'columnrange'
+  },
+  plotOptions: {
+    columnrange: {
+      states: {
+        inactive: {
+          opacity: 1 // set opacity to 1 when inactive
+        }
+      }
+    }
+  },
+  xAxis: {
+    min: 0,
+    max: 10},
+  yAxis: {
+   
+    categories: ['Apples', 'Oranges', 'Pears', 'Grapes', 'Bananas']
+  
+  },
+  series: [{
+    name: 'Range',
+    data: [
+      [1, 4],
+      [3, 7],
+      [2, 6],
+      [4, 9],
+      [2, 5]
+    ],
+    pointWidth: 50,
+    // define colors for the series
+    color: 'red',
+    negativeColor: 'green',
+    // add a plot band to define the allowed range
+    plotBands: [{
+      color: '#f2f2f2',
+      from: 2.5,
+      to: 7.5
+    }],
+    // use the point events to change the color of each point based on its position
+    point: {
+      events: {
+        mouseOver: function () {
+          var point = this;
+          // check if the range falls within the plot band
+          if (point.low < 2.5 || point.high > 7.5) {
+            point.graphic.attr({
+              fill: 'rgba(255, 0, 0, 0.5)' // set the color to red if outside the plot band
+            });
+          }
+        },
+        mouseOut: function () {
+          var point = this;
+          // reset the color to the series color when not hovered
+          point.graphic.attr({
+            fill: point.series.color
+          });
+        }
+      }
+    }
+  }]
+});
+
+}
+
+function renderColumnRangeChart() {
+  // get the chart options from the generateChartOptions function
+  var chartOptions = generateChartOptions();
+
+  // create the chart with the options
+  Highcharts.chart('container', chartOptions);
+}
+
+// call the loadHighcharts function to load the necessary modules and render the chart
+// loadHighcharts(function() {
+//   renderColumnRangeChart();
+// });
+
+</script>
+<script ng-if="data.chartRefresh == 'true'">
+    //console.log('render chart');
+    loadHighcharts(renderColumnRangeChart);
+	//renderColumnRangeChart();
+	angular.element('.unqorkio-form').scope().submission.data.chartRefresh = 'false';
+</script>

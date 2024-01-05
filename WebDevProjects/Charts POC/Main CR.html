@@ -1,0 +1,127 @@
+<div id="container"></div>
+
+<script>
+    //Elaborated the method used by John, will optimise later
+    function loadHighcharts(callback) {
+        // Load Highcharts.js
+        var highchartsScript = document.createElement('script');
+        highchartsScript.setAttribute('src', 'https://code.highcharts.com/highcharts.js');
+        highchartsScript.onload = function () {
+            // Load Highcharts-more.js
+            var highchartsMoreScript = document.createElement('script');
+            highchartsMoreScript.setAttribute('src', 'https://code.highcharts.com/highcharts-more.js');
+            highchartsMoreScript.onload = function () {
+                // Load Columnrange.js
+                var columnrangeScript = document.createElement('script');
+                columnrangeScript.setAttribute('src', 'https://code.highcharts.com/modules/accessibility.js');//this line caused all the confusion columnrange.js is not the one but accessiblity.js is.
+                columnrangeScript.onload = function () {
+                    // Call the callback function to create and render the chart
+                    if (typeof callback === 'function') {
+                        callback();
+                    }
+                    // We can hardcode this too. 
+                    //renderColumnRangeChart();
+                };
+                document.head.appendChild(columnrangeScript);
+            };
+            document.head.appendChild(highchartsMoreScript);
+        };
+        document.head.appendChild(highchartsScript);
+    }
+
+    function renderColumnRangeChart() {
+        var chartOptions = {
+            chart: {
+                type: 'columnrange',
+                inverted: true
+            },
+
+            title: {
+                text: 'Equity Allocation'
+            },
+
+            subtitle: {
+                text: 'Goal and Account Ranges Chart'
+            },
+
+            xAxis: {
+                categories: angular.element('.unqorkio-form').scope().submission.data.chartData2
+
+            },
+
+            yAxis: {
+                plotBands: [{
+                    borderWidth: 50,
+                    from: angular.element('.unqorkio-form').scope().submission.data.from,//we can use use hidden variable for from
+                    to: angular.element('.unqorkio-form').scope().submission.data.to////we can use use hidden variable for to
+                },
+                {
+                    borderWidth: 50,
+                    from: angular.element('.unqorkio-form').scope().submission.data.valueFrom,//we can use use hidden variable for from
+                    to: angular.element('.unqorkio-form').scope().submission.data.valueTo,////we can use use hidden variable for to
+                    color: angular.element('.unqorkio-form').scope().submission.data.colorWAC//color: '#FFCCCB'
+                }],
+                title: {
+                    text: 'Percentage ( % )'
+                }
+            },
+
+            tooltip: {
+                valueSuffix: ' % '
+            },
+
+            plotOptions: {
+                columnrange: {
+                    dataLabels: {
+                        enabled: true,
+                        format: '{y} % '
+                    }
+                }
+            },
+
+            legend: {
+                enabled: true
+            },
+
+            //Use dt Data as submission data for chart
+            series: [{
+                name: 'Account Range',
+                data: angular.element('.unqorkio-form').scope().submission.data.chartData
+            }, {
+                name: 'Current Equity',
+                type: 'scatter',
+                data: angular.element('.unqorkio-form').scope().submission.data.currentEquityData,
+                marker: {
+                    radius: 5
+                }
+            }]
+        };
+
+        Highcharts.chart('container', chartOptions);
+    }
+    function changeElementColor(color) {
+        var styleTag = document.createElement('style');
+        styleTag.innerHTML = `.highcharts-series-0 .highcharts-color-0:nth-child(2)  { fill: ${color}; }`;
+        document.head.appendChild(styleTag);
+        console.log('after colorline ');
+    }
+
+// Call the loadHighcharts function to load the required modules, and then call the renderColumnRangeChart function to create and render the chart
+</script>
+
+<!-- Listen for data updates to redraw the chart. Event raised in initCloseSelectFilters component -->
+
+<script ng-if="data.chartRefresh == 'true'">
+    loadHighcharts(renderColumnRangeChart);
+    angular.element('.unqorkio-form').scope().submission.data.chartRefresh = 'false';
+</script>
+
+<script ng-if="data.flag == true">
+    console.log('inside flag condition calling function now')
+    changeElementColor('#910909');
+</script>
+
+<script ng-if="data.flag == false">
+    console.log('inside else condition');
+    changeElementColor('green');
+</script>
